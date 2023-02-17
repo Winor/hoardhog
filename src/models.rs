@@ -30,7 +30,7 @@ pub fn index() -> &'static str {
 
 
 #[get("/items")]
-pub async fn alist_items(db: PgDbConn) ->  Result<Json<Vec<Item>>> {
+pub async fn list_items(db: PgDbConn) ->  Result<Json<Vec<Item>>> {
     let ids= db.run(move |conn| {
         items::table
 
@@ -39,8 +39,8 @@ pub async fn alist_items(db: PgDbConn) ->  Result<Json<Vec<Item>>> {
     Ok(Json(ids))
 }
 
-#[post("/create", data = "<post>")]
-pub async fn create(db: PgDbConn, post: Json<Item>) -> Result<Created<Json<Item>>> {
+#[post("/items", data = "<post>")]
+pub async fn create_items(db: PgDbConn, post: Json<Item>) -> Result<Created<Json<Item>>> {
     let post_value = post.clone();
     db.run(move |conn| {
         diesel::insert_into(items::table)
@@ -51,8 +51,8 @@ pub async fn create(db: PgDbConn, post: Json<Item>) -> Result<Created<Json<Item>
     Ok(Created::new("/").body(post))
 }
 
-#[put("/edit/<id>", data = "<post>")]
-pub async fn edit(db: PgDbConn, post: Json<Item>, id: i32) -> Result<Created<Json<Item>>> {
+#[put("/items/<id>", data = "<post>")]
+pub async fn edit_items(db: PgDbConn, post: Json<Item>, id: i32) -> Result<Created<Json<Item>>> {
     let post_value = post.clone();
     db.run(move |conn| {
         diesel::update(items::table)
@@ -64,8 +64,8 @@ pub async fn edit(db: PgDbConn, post: Json<Item>, id: i32) -> Result<Created<Jso
     Ok(Created::new("/").body(post))
 }
 
-#[delete("/<id>")]
-pub async fn delete(db: PgDbConn, id: i32) -> Result<Option<()>> {
+#[delete("/items/<id>")]
+pub async fn delete_items(db: PgDbConn, id: i32) -> Result<Option<()>> {
     let affected = db.run(move |conn| {
         diesel::delete(items::table)
             .filter(items::id.eq(id))

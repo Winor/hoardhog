@@ -8,7 +8,7 @@ mod models;
 mod db;
 mod schema;
 use self::db::PgDbConn;
-use self::models::{index, alist_items, create, delete, edit};
+use self::models::*;
 use rocket::figment::{value::{Map, Value}, util::map};
 use dotenvy::dotenv;
 use std::env;
@@ -25,5 +25,5 @@ pub fn rocket() -> _ {
     let figment = rocket::Config::figment()
         .merge(("databases", map!["pgcon" => db]));
 
-    rocket::custom(figment).mount("/", routes![index, alist_items, create, delete, edit]).attach(PgDbConn::fairing())
+    rocket::custom(figment).mount("/", routes![index, list_items, create_items, delete_items, edit_items]).attach(PgDbConn::fairing())
 }
