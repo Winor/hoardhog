@@ -1,9 +1,9 @@
 // delete an item
 use actix_web::{delete, Error, HttpResponse, web};
-use crate::{models::AppState, api::items::{dbq}};
+use crate::{models::AppState, api::locations::dbq};
 
 #[delete("{id}")]
-pub async fn item(data: web::Data<AppState>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
+pub async fn delete(data: web::Data<AppState>, id: web::Path<i32>) -> Result<HttpResponse, Error> {
     let conn = &data.conn;
     let id = id.into_inner();
     dbq::delete(conn, id).await

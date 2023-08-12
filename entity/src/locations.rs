@@ -9,7 +9,7 @@ pub struct Model {
     #[sea_orm(primary_key)]
     #[serde(skip_deserializing)]
     pub id: i32,
-    pub name: String,
+    pub name: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub description: Option<String>,
 }

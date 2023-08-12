@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key()
                     )
-                    .col(ColumnDef::new(Locations::Name).string().not_null())
+                    .col(ColumnDef::new(Locations::Name).string())
                     .col(ColumnDef::new(Locations::Description).text())
                     .to_owned(),
             )
@@ -58,7 +58,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key()
                     )
-                    .col(ColumnDef::new(Groups::Name).string().not_null())
+                    .col(ColumnDef::new(Groups::Name).string())
                     .col(ColumnDef::new(Groups::Description).text())
                     .to_owned(),
             )

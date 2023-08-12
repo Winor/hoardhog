@@ -1,10 +1,10 @@
-// create an item
 use actix_web::{put, Error, HttpResponse, web};
+use entity::custom::locations::Update;
 use sea_orm::TryIntoModel;
-use crate::{models::AppState, api::items::{dbq}};
+use crate::{models::AppState, api::locations::dbq};
 
 #[put("")]
-pub async fn item(data: web::Data<AppState>, payload: web::Json<entity::custom::items::UpdateItem>) -> Result<HttpResponse, Error> {
+pub async fn update(data: web::Data<AppState>, payload: web::Json<Update>) -> Result<HttpResponse, Error> {
     let conn = &data.conn;
     let form = payload.into_inner();
     let items = dbq::update(conn, form).await

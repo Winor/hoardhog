@@ -1,6 +1,6 @@
 // list all items
 use actix_web::{get, Error, HttpResponse, web};
-use crate::{models::AppState, api::items::dbq};
+use crate::{models::AppState, api::locations::dbq};
 
 #[get("")]
 pub async fn items(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
@@ -11,7 +11,7 @@ pub async fn items(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
       if let Some(items) = items {
         Ok(HttpResponse::Ok().json(items))
     } else {
-        let res = HttpResponse::NotFound().body(format!("No items found"));
+        let res = HttpResponse::NotFound().body(format!("Not found"));
         Ok(res)
     }
 }

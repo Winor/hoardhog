@@ -8,7 +8,7 @@ use entity::custom::items::*;
 pub async fn item(data: web::Data<AppState>, payload: web::Json<NewItem>) -> Result<HttpResponse, Error> {
     let conn = &data.conn;
     let form = payload.into_inner();
-    let items = dbq::create_item(conn, form).await
+    let items = dbq::create(conn, form).await
     .map_err(actix_web::error::ErrorInternalServerError)?;
     let result = items.try_into_model().map_err(actix_web::error::ErrorInternalServerError)?;
 
