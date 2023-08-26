@@ -6,27 +6,6 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        //Item
-        manager
-            .create_table(
-                Table::create()
-                    .table(Items::Table)
-                    .if_not_exists()
-                    .col(
-                        ColumnDef::new(Items::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key()
-                    )
-                    .col(ColumnDef::new(Items::Name).string())
-                    .col(ColumnDef::new(Items::Quantity).integer().default(1))
-                    .col(ColumnDef::new(Items::Unit).string().default("Piece"))
-                    .col(ColumnDef::new(Items::Description).text())
-                    .col(ColumnDef::new(Items::Instock).boolean().default(true))
-                    .to_owned(),
-            )
-            .await?;
             // Location
             manager
             .create_table(
@@ -42,6 +21,55 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Locations::Name).string())
                     .col(ColumnDef::new(Locations::Description).text())
+                    .to_owned(),
+            )
+            .await?;
+            // Categories
+            manager
+            .create_table(
+                Table::create()
+                    .table(Categories::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(Categories::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                    )
+                    .col(ColumnDef::new(Categories::Name).string())
+                    .col(ColumnDef::new(Categories::Fields).string())
+                    .to_owned(),
+            )
+            .await?;
+        //Item
+        manager
+            .create_table(
+                Table::create()
+                    .table(Items::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(Items::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                    )
+                    .col(ColumnDef::new(Items::Name).string())
+                    .col(ColumnDef::new(Items::Quantity).integer().default(1))
+                    .col(ColumnDef::new(Items::CategoryId).integer().default(Value::Int(None)))
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Items::Table, Items::CategoryId)
+                            .to(Categories::Table, Categories::Id)
+                    )
+                    .col(ColumnDef::new(Items::Description).text())
+                    .col(ColumnDef::new(Items::LocationId).integer().default(Value::Int(None)))
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Items::Table, Items::LocationId)
+                            .to(Locations::Table, Locations::Id)
+                    )
                     .to_owned(),
             )
             .await?;
@@ -63,101 +91,84 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-            // Tags
+            // Categories
             manager
             .create_table(
                 Table::create()
-                    .table(Tags::Table)
+                    .table(Categories::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(Tags::Id)
+                        ColumnDef::new(Categories::Id)
                             .integer()
                             .not_null()
                             .auto_increment()
                             .primary_key()
                     )
-                    .col(ColumnDef::new(Tags::ItemId).integer().default(Value::Int(None)))
-                    .col(ColumnDef::new(Tags::GroupId).integer().default(Value::Int(None)))
-                    .col(ColumnDef::new(Tags::Description).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Tags::Table, Tags::ItemId)
-                            .to(Items::Table, Items::Id)
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Tags::Table, Tags::GroupId)
-                            .to(Groups::Table, Groups::Id)
-                    )
+                    .col(ColumnDef::new(Categories::Fields).json())
                     .to_owned(),
             )
             .await?;
-            // ItemLocation
-            manager
-            .create_table(
-                Table::create()
-                    .table(ItemLocation::Table)
-                    .if_not_exists()
-                    .col(ColumnDef::new(ItemLocation::ItemId).integer().default(Value::Int(None)))
-                    .col(ColumnDef::new(ItemLocation::LocationId).integer().default(Value::Int(None)))
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(ItemLocation::Table, ItemLocation::ItemId)
-                            .to(Items::Table, Items::Id)
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(ItemLocation::Table, ItemLocation::LocationId)
-                            .to(Locations::Table, Locations::Id)
-                    )
-                    .primary_key(Index::create().col(ItemLocation::ItemId).col(ItemLocation::LocationId))
-                    .to_owned(),
-            )
-            .await?;
-            // GroupLocation
-            manager
-            .create_table(
-                Table::create()
-                    .table(GroupLocation::Table)
-                    .if_not_exists()
-                    .col(ColumnDef::new(GroupLocation::GroupId).integer().default(Value::Int(None)))
-                    .col(ColumnDef::new(GroupLocation::LocationId).integer().default(Value::Int(None)))
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(GroupLocation::Table, GroupLocation::GroupId)
-                            .to(Groups::Table, Groups::Id)
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(GroupLocation::Table, GroupLocation::LocationId)
-                            .to(Locations::Table, Locations::Id)
-                    )
-                    .primary_key(Index::create().col(GroupLocation::GroupId).col(GroupLocation::LocationId))
-                    .to_owned(),
-            )
-            .await?;
-            // ItemGroup
+        // item group
             manager
             .create_table(
                 Table::create()
                     .table(ItemGroup::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(ItemGroup::ItemId).integer().default(Value::Int(None)))
-                    .col(ColumnDef::new(ItemGroup::GroupId).integer().default(Value::Int(None)))
                     .foreign_key(
                         ForeignKey::create()
                             .from(ItemGroup::Table, ItemGroup::ItemId)
                             .to(Items::Table, Items::Id)
                     )
+                    .col(ColumnDef::new(ItemGroup::GroupId).integer().default(Value::Int(None)))
                     .foreign_key(
                         ForeignKey::create()
-                            .from(ItemLocation::Table, ItemGroup::GroupId)
+                            .from(ItemGroup::Table, ItemGroup::GroupId)
                             .to(Groups::Table, Groups::Id)
                     )
                     .primary_key(Index::create().col(ItemGroup::ItemId).col(ItemGroup::GroupId))
                     .to_owned(),
             )
             .await?;
+        // Field
+        manager
+        .create_table(
+            Table::create()
+                .table(Field::Table)
+                .if_not_exists()
+                .col(
+                    ColumnDef::new(Categories::Id)
+                        .integer()
+                        .not_null()
+                        .auto_increment()
+                        .primary_key()
+                )
+                .col(ColumnDef::new(Field::Data).json())
+                .to_owned(),
+        )
+        .await?;
+        // item field
+        manager
+        .create_table(
+            Table::create()
+                .table(ItemField::Table)
+                .if_not_exists()
+                .col(ColumnDef::new(ItemField::ItemId).integer().default(Value::Int(None)))
+                .foreign_key(
+                    ForeignKey::create()
+                        .from(ItemField::Table, ItemField::ItemId)
+                        .to(Items::Table, Items::Id)
+                )
+                .col(ColumnDef::new(ItemField::FieldId).integer().default(Value::Int(None)))
+                .foreign_key(
+                    ForeignKey::create()
+                        .from(ItemField::Table, ItemField::FieldId)
+                        .to(Field::Table, Field::Id)
+                )
+                .primary_key(Index::create().col(ItemField::ItemId).col(ItemField::FieldId))
+                .to_owned(),
+        )
+        .await?;
 
         Ok(())
 
@@ -166,25 +177,25 @@ impl MigrationTrait for Migration {
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Replace the sample below with your own migration scripts
         manager
-            .drop_table(Table::drop().table(Items::Table).to_owned())
-            .await?;
+        .drop_table(Table::drop().table(Locations::Table).to_owned())
+        .await?;
         manager
-            .drop_table(Table::drop().table(Locations::Table).to_owned())
+        .drop_table(Table::drop().table(Categories::Table).to_owned())
+        .await?;
+        manager
+            .drop_table(Table::drop().table(Items::Table).to_owned())
             .await?;
         manager
             .drop_table(Table::drop().table(Groups::Table).to_owned())
             .await?;
         manager
-            .drop_table(Table::drop().table(Tags::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ItemLocation::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(GroupLocation::Table).to_owned())
-            .await?;
-        manager
             .drop_table(Table::drop().table(ItemGroup::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(Field::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ItemField::Table).to_owned())
             .await?;
         
         Ok(())
@@ -198,9 +209,9 @@ enum Items {
     Id,
     Name,
     Quantity,
-    Unit,
+    CategoryId,
     Description,
-    Instock,
+    LocationId,
 }
 
 #[derive(Iden)]
@@ -220,31 +231,30 @@ enum Groups {
 }
 
 #[derive(Iden)]
-enum Tags {
+enum Categories {
     Table,
     Id,
-    ItemId,
-    GroupId,
-    Description,
+    Fields,
+    Name,
 }
 
 #[derive(Iden)]
-enum ItemLocation {
+enum ItemField {
     Table,
     ItemId,
-    LocationId,
+    FieldId,
 }
 
 #[derive(Iden)]
-enum GroupLocation {
+enum Field {
     Table,
-    GroupId,
-    LocationId,
+    Id,
+    Data,
 }
 
 #[derive(Iden)]
 enum ItemGroup {
     Table,
-    ItemId,
     GroupId,
+    ItemId,
 }

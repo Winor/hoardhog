@@ -4,34 +4,24 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "groups")]
+#[sea_orm(table_name = "categories")]
 pub struct Model {
     #[sea_orm(primary_key)]
     #[serde(skip_deserializing)]
     pub id: i32,
     pub name: Option<String>,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub description: Option<String>,
+    pub fields: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::item_group::Entity")]
-    ItemGroup,
-}
-
-impl Related<super::item_group::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::ItemGroup.def()
-    }
+    #[sea_orm(has_many = "super::items::Entity")]
+    Items,
 }
 
 impl Related<super::items::Entity> for Entity {
     fn to() -> RelationDef {
-        super::item_group::Relation::Items.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::item_group::Relation::Groups.def().rev())
+        Relation::Items.def()
     }
 }
 

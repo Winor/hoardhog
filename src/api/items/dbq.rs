@@ -1,50 +1,63 @@
-use actix_web::web::Json;
 use entity::items as item;
 use entity::locations as location;
 use migration::DbErr;
-use sea_orm::ActiveModelTrait;
-use sea_orm::ActiveValue::NotSet;
-use sea_orm::DatabaseConnection;
-use sea_orm::DeleteResult;
-use sea_orm::EntityTrait;
-use sea_orm::Insert;
-use sea_orm::IntoActiveModel;
-
-// use super::schemas::NewItem;
-
+use sea_orm::{ActiveModelTrait,IntoActiveModel,EntityTrait,DeleteResult,DatabaseConnection};
 use entity::custom::items::*;
-use sea_orm::Set;
+use sea_orm::LoaderTrait;
 
-// type DbError = Box<dyn std::error::Error + Send + Sync>;
-
-pub async fn get_all(conn: &DatabaseConnection) -> Result<Option<Vec<item::Model>>, sea_orm::DbErr> {
+pub async fn get(conn: &DatabaseConnection) -> Result<Option<Vec<item::Model>>, sea_orm::DbErr> {
     let items: Vec<item::Model> = item::Entity::find().all(conn).await?;
     Ok(Some(items))
 }
 
-pub async fn get_all_rl(conn: &DatabaseConnection) -> Result<Option<Vec<(entity::items::Model, Vec<entity::locations::Model>)>>, sea_orm::DbErr> {
-    // let items: Vec<item> = Item::find().all(conn).await?;
-    // Ok(Some(items))
-    let cake_with_fruits: Vec<(item::Model, Vec<location::Model>)> = item::Entity::find()
-    .find_with_related(location::Entity)
-    .all(conn)
-    .await?;
-    Ok(Some(cake_with_fruits))
+
+pub async fn get_all(conn: &DatabaseConnection) -> Result<Option<Vec<AllItems>>, sea_orm::DbErr> {
+    let items: Vec<item::Model> = item::Entity::find().all(conn).await?;
+    let locations = items.load_one(location::Entity, conn).await?.into_iter();
+    let categories = items
+        .load_one(entity::categories::Entity, conn)
+        .await?
+        .into_iter();
+    let res = items
+        .into_iter()
+        .zip(locations)
+        .zip(categories)
+        .map(|((item, location), category)| AllItems {
+            items: item,
+            location: location,
+            category: category,
+        })
+        .collect();
+    Ok(Some(res))
 }
 
-pub async fn create(conn: &DatabaseConnection, item_data: NewItem) -> Result<item::ActiveModel, sea_orm::DbErr> {
-    item::ActiveModel::from(item_data.into_active_model()).save(conn).await
+pub async fn create(
+    conn: &DatabaseConnection,
+    item_data: NewItem,
+) -> Result<item::ActiveModel, sea_orm::DbErr> {
+    item::ActiveModel::from(item_data.into_active_model())
+        .save(conn)
+        .await
 }
 
 pub async fn find(conn: &DatabaseConnection, id: i32) -> Result<item::ActiveModel, sea_orm::DbErr> {
-    item::Entity::find_by_id(id).one(conn).await?.ok_or(DbErr::Custom("Cannot find post.".to_owned())).map(Into::into)
+    item::Entity::find_by_id(id)
+        .one(conn)
+        .await?
+        .ok_or(DbErr::Custom("Cannot find post.".to_owned()))
+        .map(Into::into)
 }
 
 pub async fn delete(conn: &DatabaseConnection, id: i32) -> Result<DeleteResult, sea_orm::DbErr> {
     find(&conn, id).await?.delete(conn).await
 }
 
-pub async fn update(conn: &DatabaseConnection, item_data: UpdateItem) -> Result<item::ActiveModel, sea_orm::DbErr> {
+pub async fn update(
+    conn: &DatabaseConnection,
+    item_data: UpdateItem,
+) -> Result<item::ActiveModel, sea_orm::DbErr> {
     //let item: item::Model = find_item(&conn, item_data.id).await.into()?;
-    item::ActiveModel::from(item_data.into_active_model()).save(conn).await
+    item::ActiveModel::from(item_data.into_active_model())
+        .save(conn)
+        .await
 }
