@@ -1,6 +1,7 @@
 mod services;
 mod models;
 mod api;
+mod query;
 use dotenvy::dotenv;
 use models::AppState;
 use sea_orm::{Database, DatabaseConnection };

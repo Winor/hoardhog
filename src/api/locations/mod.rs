@@ -1,6 +1,5 @@
 use actix_web::web;
 
-pub mod dbq;
 pub mod list;
 pub mod delete;
 pub mod create;
