@@ -2,14 +2,6 @@ use serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 use crate::items::ActiveModel;
 
-#[derive(Serialize, Deserialize)]
-pub struct AllItems {
-    #[serde(flatten)]
-    pub items: crate::items::Model,
-    pub location: Option<crate::locations::Model>,
-    pub category: Option<crate::categories::Model>,
-}
-
 #[derive(Serialize, Deserialize, DeriveIntoActiveModel)]
 pub struct NewItem {
     pub name: String,

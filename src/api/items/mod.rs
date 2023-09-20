@@ -7,7 +7,7 @@ pub mod update;
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/items")
-            .service(list::item)
+            .service(list::list)
             .service(create::item)
             .service(delete::item)
             .service(update::item)

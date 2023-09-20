@@ -12,3 +12,5 @@ pub enum Data<T> {
     Location(T),
 }
 
+// pub type Return<T> = Result<Option<Data<Is<T>>>, sea_orm::DbErr>;
+pub type Return<T> = Result<Option<T>, sea_orm::DbErr>;

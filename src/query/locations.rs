@@ -1,13 +1,11 @@
 use entity::custom::locations;
 use entity::locations as location;
 use migration::DbErr;
-use sea_orm::ActiveModelTrait;
-use sea_orm::DatabaseConnection;
-use sea_orm::DeleteResult;
-use sea_orm::EntityTrait;
-use sea_orm::IntoActiveModel;
+use sea_orm::{ActiveModelTrait,IntoActiveModel,EntityTrait,DeleteResult,DatabaseConnection};
 
-pub async fn get_all(conn: &DatabaseConnection) -> Result<Option<Vec<location::Model>>, sea_orm::DbErr> {
+use super::query::Return;
+
+pub async fn get_all(conn: &DatabaseConnection) -> Return<Vec<location::Model>> {
     let list: Vec<location::Model> = location::Entity::find().all(conn).await?;
     Ok(Some(list))
 }

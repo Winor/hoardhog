@@ -1,43 +1,15 @@
 use entity::items as item;
 // use entity::locations as location;
-use migration::{DbErr, query};
-use sea_orm::{ActiveModelTrait,IntoActiveModel,EntityTrait,DeleteResult,DatabaseConnection, ModelTrait};
+use migration::DbErr;
+use sea_orm::{ActiveModelTrait,IntoActiveModel,EntityTrait,DeleteResult,DatabaseConnection};
 use entity::custom::items::*;
 
-use super::query::{Data, Is};
-// use sea_orm::LoaderTrait;
+use super::query::Return;
 
-// pub async fn get_all(conn: &DatabaseConnection) -> Result<Option<Vec<item::Model>>, sea_orm::DbErr> {
-//     let items: Vec<item::Model> = item::Entity::find().all(conn).await?;
-//     Ok(Some(items))
-// }
-type Return<T> = Result<Option<Data<Is<T>>>, sea_orm::DbErr>;
-
-pub async fn get_all(conn: &DatabaseConnection) -> Return<item::Model> {
+pub async fn get_all(conn: &DatabaseConnection) -> Return<Vec<item::Model>> {
     let items: Vec<item::Model> = item::Entity::find().all(conn).await?;
-    Ok(Some(Data::Item(Is::Many(items))))
+    Ok(Some(items))
 }
-
-
-// pub async fn get_all(conn: &DatabaseConnection) -> Result<Option<Vec<AllItems>>, sea_orm::DbErr> {
-//     let items: Vec<item::Model> = item::Entity::find().all(conn).await?;
-//     let locations = items.load_one(location::Entity, conn).await?.into_iter();
-//     let categories = items
-//         .load_one(entity::categories::Entity, conn)
-//         .await?
-//         .into_iter();
-//     let res = items
-//         .into_iter()
-//         .zip(locations)
-//         .zip(categories)
-//         .map(|((item, location), category)| AllItems {
-//             items: item,
-//             location: location,
-//             category: category,
-//         })
-//         .collect();
-//     Ok(Some(res))
-// }
 
 pub async fn create(
     conn: &DatabaseConnection,
