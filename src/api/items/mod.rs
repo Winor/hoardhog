@@ -3,6 +3,7 @@ pub mod list;
 pub mod delete;
 pub mod create;
 pub mod update;
+pub mod find;
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -11,5 +12,6 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .service(create::item)
             .service(delete::item)
             .service(update::item)
+            .service(find::item)
     );
 }
