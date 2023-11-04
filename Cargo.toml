@@ -14,3 +14,4 @@ serde = { version = "1.0", features = ["derive"] }
 entity = { path = "./entity" }
 migration = { path = "./migration" }
 optional_struct = "0.3.1"
+actix-cors = "0.6.4"

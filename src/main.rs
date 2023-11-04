@@ -8,6 +8,7 @@ use sea_orm::{Database, DatabaseConnection };
 use std::env;
 use actix_web::{middleware, web, HttpServer, App};
 use migration::{Migrator, MigratorTrait};
+use actix_cors::Cors;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,6 +25,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // set up DB pool to be used with web::Data<Pool> extractor
             .app_data(web::Data::new(state.clone()))
+            .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
             .configure(api::init_routes)
             // .service(delete_items)
